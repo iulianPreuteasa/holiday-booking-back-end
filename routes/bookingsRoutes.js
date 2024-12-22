@@ -22,12 +22,18 @@ router.post("/request", async (req, res) => {
 
     // Verifică dacă deja există intervalul de date
     const isDuplicate = existingBookings.some((booking) => {
-      return booking.requestDates.some((range) => {
+      // Verifică dacă booking.booking este un obiect și dacă are startDate și endDate
+      if (
+        booking.booking &&
+        booking.booking.startDate &&
+        booking.booking.endDate
+      ) {
         return (
-          range.startDate.getTime() === startDate.getTime() &&
-          range.endDate.getTime() === endDate.getTime()
+          booking.booking.startDate.getTime() === startDate.getTime() &&
+          booking.booking.endDate.getTime() === endDate.getTime()
         );
-      });
+      }
+      return false; // Dacă booking.booking nu este valid, returnează false
     });
 
     if (isDuplicate) {
@@ -38,13 +44,15 @@ router.post("/request", async (req, res) => {
 
     const newBooking = new Bookings({
       user: user._id,
-      requestDates: [{ startDate, endDate }],
+      booking: { startDate, endDate },
+      status: "requested",
     });
+
     await newBooking.save();
-    // Trimite răspuns cu ID-ul rezervării și alte informații necesare
+
     return res.status(201).json({
       message: "Booking created successfully",
-      bookingId: newBooking._id, // Trimite ID-ul rezervării
+      bookingId: newBooking._id,
     });
   } catch (error) {
     console.error("Error in request: ", error);

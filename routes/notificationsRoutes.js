@@ -51,30 +51,25 @@ router.delete("/delete/:bookingId", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const { userId } = req.query; // Obținem userId din query params
+  const { userId } = req.query;
 
   try {
-    // 1. Obținem notificările pentru userId-ul respectiv
     const notifications = await Notifications.find({ user: userId })
-      .populate("booking") // Populăm notificările cu detalii despre booking
+      .populate("booking")
       .exec();
 
-    // 2. Mergem prin notificări și adăugăm detaliile despre rezervări
     const notificationsWithBookingDetails = notifications.map(
       (notification) => {
-        const booking = notification.booking; // Detaliile booking-ului asociat notificării
+        const booking = notification.booking;
+        const bookings = {
+          startDate: booking.booking.startDate,
+          endDate: booking.booking.endDate,
+        };
 
-        // Extragem datele din requestDates pentru fiecare rezervare
-        const requestDates = booking.requestDates.map((dateRange) => ({
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate,
-        }));
-
-        // Întoarcem notificările populate cu detaliile de rezervare
         return {
           ...notification.toObject(),
           bookingDetails: {
-            requestDates, // Adăugăm requestDates în notificare
+            bookings,
             user: booking.user,
           },
         };
