@@ -2,8 +2,45 @@ const express = require("express");
 const Bookings = require("../models/Bookings");
 const User = require("../models/User");
 const Notifications = require("../models/Notifications");
+const mongoose = require("mongoose");
 
 const router = express.Router();
+
+router.patch("/request/:status", async (req, res) => {
+  const { status } = req.params;
+  const { bookingId, notificationId } = req.body;
+
+  const notificationToRemove = await Notifications.findById(notificationId);
+
+  const validStatuses = ["requested", "accepted", "rejected"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+    return res.status(400).json({ message: "Invalid booking ID" });
+  }
+
+  try {
+    const bookingToChange = await Bookings.findById(bookingId);
+
+    if (!bookingToChange) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    bookingToChange.status = status;
+    await bookingToChange.save();
+
+    await Notifications.findByIdAndDelete(notificationToRemove);
+
+    return res.status(200).json({
+      message: "Booking status updated successfully",
+      booking: bookingToChange,
+    });
+  } catch (error) {
+    console.error("Error in request: ", error);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
 
 router.post("/request", async (req, res) => {
   const { userId, dateStart, dateEnd } = req.body;
