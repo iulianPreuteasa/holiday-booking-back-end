@@ -1,13 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config(); // pentru a gestiona variabilele de mediu
+require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
-app.use(cors()); // Permite cererile din frontend (React)
+app.use(
+  cors({
+    origin: "http://localhost:3000", // frontend-ul tău
+    credentials: true, // permite trimiterea cookie-urilor
+  })
+);
 app.use(express.json()); // Parsează corpul request-urilor în JSON
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // support URL-encoded bodies
+app.use(cookieParser());
 
 // Conectează-te la MongoDB
 mongoose
