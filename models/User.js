@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
   refreshToken: String,
+  role: {
+    type: String,
+    enum: ["admin", "employee", "employer"],
+    default: "employee",
+  },
 });
 
 const User = mongoose.model("User", userSchema);

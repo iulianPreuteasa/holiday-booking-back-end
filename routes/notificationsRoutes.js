@@ -1,7 +1,6 @@
 const express = require("express");
 const Notifications = require("../models/Notifications");
 const Bookings = require("../models/Bookings");
-const { verify } = require("jsonwebtoken");
 
 const router = express.Router();
 

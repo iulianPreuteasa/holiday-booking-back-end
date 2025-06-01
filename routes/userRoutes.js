@@ -2,7 +2,6 @@ const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
 const { hash, compare } = require("bcryptjs");
-const { isAuth } = require("../isAuth.js");
 const {
   createAccessToken,
   createRefreshToken,
@@ -49,8 +48,8 @@ router.post("/login", async (req, res) => {
     const valid = await compare(password, user.password);
 
     if (valid) {
-      const accessToken = createAccessToken(user.id);
-      const refreshToken = createRefreshToken(user.id);
+      const accessToken = createAccessToken(user.id, user.role);
+      const refreshToken = createRefreshToken(user.id, user.role);
       // Salvează refreshToken-ul în baza de date
       user.refreshToken = refreshToken;
       await user.save();
@@ -78,7 +77,7 @@ router.post("/logout", (_req, res) => {
 
 // refresh tooken
 
-router.get("/refresh_token", async (req, res) => {
+router.post("/refresh_token", async (req, res) => {
   const token = req.cookies.refreshtoken;
 
   if (!token) return res.send({ accesstoken: "" });
@@ -97,8 +96,8 @@ router.get("/refresh_token", async (req, res) => {
     return res.send({ accesstoken: "" });
   }
 
-  const accesstoken = createAccessToken(user.id);
-  const refreshtoken = createRefreshToken(user.id);
+  const accesstoken = createAccessToken(user.id, user.role);
+  const refreshtoken = createRefreshToken(user.id, user.role);
 
   user.refreshToken = refreshtoken;
   await user.save();
@@ -107,7 +106,12 @@ router.get("/refresh_token", async (req, res) => {
 
   return res.send({
     accesstoken,
-    user: { name: user.name, surname: user.surname, _id: user._id },
+    user: {
+      name: user.name,
+      surname: user.surname,
+      _id: user._id,
+      role: user.role,
+    },
   });
 });
 
@@ -124,6 +128,7 @@ router.get("/", async (req, res) => {
         name: user.name,
         surname: user.surname,
         id: user._id,
+        role: user.role,
       });
     });
 

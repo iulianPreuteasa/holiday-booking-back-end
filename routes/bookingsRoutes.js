@@ -3,7 +3,6 @@ const Bookings = require("../models/Bookings");
 const User = require("../models/User");
 const Notifications = require("../models/Notifications");
 const mongoose = require("mongoose");
-const { verify } = require("jsonwebtoken");
 
 const router = express.Router();
 
