@@ -10,6 +10,8 @@ router.post("/logout", userController.logoutUser);
 
 router.post("/refresh_token", userController.refreshToken);
 
+router.put("/updateroles", userController.updateRoles);
+
 router.get("/", userController.getUsers);
 
 module.exports = router;

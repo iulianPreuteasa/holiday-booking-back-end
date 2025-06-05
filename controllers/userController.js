@@ -137,10 +137,25 @@ const getUsers = async (req, res) => {
   }
 };
 
+const updateRoles = async (req, res) => {
+  const usersToUpdate = req.body;
+  try {
+    const updatedUsers = usersToUpdate.map((user) =>
+      User.findByIdAndUpdate(user.id, { role: user.role })
+    );
+    await Promise.all(updatedUsers);
+    res.status(200).json({ message: "Roles updated successfully" });
+  } catch (e) {
+    console.error("Error in updating users:" + e);
+    res.status(500).json({ message: "Error in updating users" });
+  }
+};
+
 module.exports = {
   createUser,
   loginUser,
   logoutUser,
   getUsers,
-  refreshToken
+  refreshToken,
+  updateRoles,
 };
